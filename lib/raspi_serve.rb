@@ -1,29 +1,37 @@
 require "rack"
 require "rack/handler/puma"
+require "rack/cors"
 require "warden"
 require "raspi_serve/version"
 require "raspi_serve/api_key_warden_strategy"
 
 module RaspiServe
-end
 
+  def self.create_rack_app(&block)
 
-# usage:
-# curl localhost:9292
-# curl localhost:9292 -H "API_KEY:123"
-app = Rack::Builder.app do
+    rack_app = Rack::Builder.new do
+      ApiKeyWardenStrategy.register_on_warden
 
-  RaspiServe::ApiKeyWardenStrategy.register_on_warden
+      use Rack::Cors do
+        allow do
+          origins '*'
+          resource '*', :methods => [:get, :post]
+        end
+      end
 
-  use Warden::Manager do |manager|
-    manager.failure_app = proc { [401, {'Content-Type' => 'text/html'}, ['Not Authorized']] }
-    manager.default_strategies RaspiServe::ApiKeyWardenStrategy.identifier
+      use Warden::Manager do |manager|
+        manager.failure_app = proc { [401, {'Content-Type' => 'text/html'}, ['Not Authorized']] }
+        manager.default_strategies ApiKeyWardenStrategy.identifier
+      end
+
+      run proc { |env|
+        env['warden'].authenticate!
+        [200, { 'Content-Type' => 'plain/text' }, ['Hello world']]
+      }
+    end.to_app
+    block.call(rack_app) if block_given?
+    rack_app
+
   end
 
-  run proc { |env|
-    env['warden'].authenticate!
-    proc { [200, { 'Content-Type' => 'plain/text' }, ['Hello world']] }.call env
-  }
 end
-
-Rack::Handler::Puma.run app, Port: 9292

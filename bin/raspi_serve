@@ -1,3 +1,11 @@
 #!/usr/bin/env ruby
 
 require 'raspi_serve'
+
+# usage:
+# curl localhost:9292
+# curl localhost:9292 -H "API_KEY:123" -H "ORIGIN:http://www.foo.com"
+
+RaspiServe.create_rack_app do |app|
+    Rack::Handler::Puma.run app, Port: 9292
+end
