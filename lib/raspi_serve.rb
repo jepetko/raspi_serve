@@ -2,8 +2,8 @@ require "rack"
 require "rack/handler/puma"
 require "rack/cors"
 require "warden"
-require "raspi_serve/version"
-require "raspi_serve/api_key_warden_strategy"
+
+Dir[File.expand_path('**/*.rb', File.dirname(__FILE__))].each { |f| require f }
 
 module RaspiServe
 
