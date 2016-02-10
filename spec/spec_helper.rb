@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
+require 'capybara/rspec'
 require 'fabricators/snippet_fabricator'
 require 'matchers/file_matcher'
 require 'raspi_serve'
@@ -16,3 +17,5 @@ RSpec.configure do |config|
     clear
   end
 end
+
+Capybara.app = RaspiServe.create_rack_app

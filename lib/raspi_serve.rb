@@ -23,10 +23,18 @@ module RaspiServe
         manager.default_strategies ApiKeyWardenStrategy.identifier
       end
 
-      run proc { |env|
-        env['warden'].authenticate!
-        [200, { 'Content-Type' => 'plain/text' }, ['Hello world']]
-      }
+      map '/snippets' do
+        run proc { |env|
+          [200, { 'Content-Type' => 'application/json' }, []]
+        }
+      end
+
+      map '/' do
+        run proc { |env|
+          env['warden'].authenticate!
+          [200, { 'Content-Type' => 'plain/text' }, ['Hello world']]
+        }
+      end
     end.to_app
     block.call(rack_app) if block_given?
     rack_app
