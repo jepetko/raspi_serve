@@ -2,7 +2,6 @@ require "rack"
 require "rack/handler/puma"
 require "rack/cors"
 require "warden"
-
 Dir[File.expand_path('**/*.rb', File.dirname(__FILE__))].each { |f| require f }
 
 module RaspiServe
