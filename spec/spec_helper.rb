@@ -5,13 +5,14 @@ require 'matchers/file_matcher'
 require 'raspi_serve'
 
 RSpec.configure do |config|
+
   config.before(:suite) do
     config.instance_eval do
-      def target_dir
-        '/tmp'
-      end
+      include RaspiServe::Snippet::ClassMethods
     end
   end
+
   config.before(:each) do
+    clear
   end
 end

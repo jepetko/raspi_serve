@@ -6,7 +6,7 @@ describe RaspiServe::Snippet do
     let(:snippet) { Fabricate(:snippet) }
 
     it 'references a file path' do
-      snippet.file_path.should =~ /\/snippet\-.*\.rb/
+      expect(snippet.file_path).to match /\/snippet\-.*\.rb/
     end
 
     it 'saves a snippet in a file' do
@@ -16,7 +16,10 @@ describe RaspiServe::Snippet do
 
   context 'listing' do
     before do
-      3.times { |i| Fabricate(:snippet, code: %Q[puts "trial#{i}"]) }
+      3.times do |i|
+        Fabricate(:snippet, code: %Q[puts "trial#{i}"])
+        sleep 0.2
+      end
     end
 
     it 'lists all snippets' do
@@ -25,7 +28,7 @@ describe RaspiServe::Snippet do
 
     it 'lists recent 2 snippets' do
       expect(RaspiServe::Snippet.recent(2).count).to be 2
-      expect(RaspiServe::Snippet.recent(2).first.code).to eq 'puts "trail3"'
+      expect(RaspiServe::Snippet.recent(2).first.code).to eq 'puts "trial2"'
     end
 
   end
