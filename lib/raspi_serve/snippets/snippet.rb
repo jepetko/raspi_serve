@@ -71,6 +71,10 @@ module RaspiServe
       File.delete file_path
     end
 
+    def to_json(state)
+      file_path
+    end
+
     private
 
     def file_name

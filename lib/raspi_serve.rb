@@ -2,6 +2,8 @@ require "rack"
 require "rack/handler/puma"
 require "rack/cors"
 require "warden"
+require "json"
+
 Dir[File.expand_path('**/*.rb', File.dirname(__FILE__))].each { |f| require f }
 
 module RaspiServe
@@ -25,7 +27,8 @@ module RaspiServe
 
       map '/snippets' do
         run proc { |env|
-          [200, { 'Content-Type' => 'application/json' }, []]
+          env['warden'].authenticate!
+          [200, { 'Content-Type' => 'application/json' }, Snippet.all.to_json ]
         }
       end
 
