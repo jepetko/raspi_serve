@@ -30,11 +30,15 @@ module RaspiServe
         load_files list_files.sort_by {|f| File.mtime(f)}.reverse.first(count)
       end
 
-      private
+      def create(params)
+        Snippet.new(*params).save
+      end
 
       def list_files
         Dir[File.expand_path("#{prefix}*.rb", target_dir)]
       end
+
+      private
 
       def load_files(files)
         snippets = []
@@ -53,6 +57,7 @@ module RaspiServe
     def initialize(code = nil, file_path = nil, &block)
       @code = code
       @file_path = file_path
+      @id = @file_path.match(/(?<=\-)[a-z0-9]+(?=\.rb)/).captures.first if @file_path
       block.call(self) if block_given?
     end
 
@@ -72,14 +77,19 @@ module RaspiServe
     end
 
     def to_json(state)
-      file_path
+      file_path.inspect
+    end
+
+    def id
+      @id ||= SecureRandom.hex
     end
 
     private
 
     def file_name
-      Time.now.strftime("#{self.class.prefix}%Y-%m-%d_%H-%M-%S-%L.rb")
+      Time.now.strftime("#{self.class.prefix}%Y-%m-%d_%H-%M-%S-#{id}.rb")
     end
+
 
   end
 

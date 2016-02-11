@@ -12,6 +12,17 @@ describe RaspiServe::Snippet do
     it 'saves a snippet in a file' do
       expect(snippet).to create_a_file('/tmp/snippet-*.rb').in_the_recent_seconds(1)
     end
+
+    it 'sets an id' do
+      expect(snippet.id).to be
+    end
+  end
+
+  context 'creating' do
+
+    it 'creates a snippet' do
+      expect { RaspiServe::Snippet.create(code: %q[puts 'hello']) }.to change { RaspiServe::Snippet.list_files.count }.by(1)
+    end
   end
 
   context 'listing' do
