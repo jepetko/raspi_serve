@@ -31,7 +31,12 @@ module RaspiServe
       end
 
       def create(params)
-        Snippet.new(*params).save
+        Snippet.new(params['code']).save
+      end
+
+      def where(params)
+        return nil unless files = Dir[File.expand_path("#{prefix}*#{params[:id]}.rb", target_dir)]
+        load_files files
       end
 
       def list_files
@@ -52,12 +57,12 @@ module RaspiServe
 
     extend ClassMethods
 
-    attr_accessor :code, :file_path
+    attr_accessor :id, :code, :file_path
 
     def initialize(code = nil, file_path = nil, &block)
       @code = code
       @file_path = file_path
-      @id = @file_path.match(/(?<=\-)[a-z0-9]+(?=\.rb)/).captures.first if @file_path
+      @id = @file_path.match(/(?<=\-)[a-z0-9]+(?=\.rb)/)[0] if @file_path
       block.call(self) if block_given?
     end
 
@@ -77,7 +82,7 @@ module RaspiServe
     end
 
     def to_json(state)
-      file_path.inspect
+      {id: id}.to_json
     end
 
     def id
@@ -89,7 +94,6 @@ module RaspiServe
     def file_name
       Time.now.strftime("#{self.class.prefix}%Y-%m-%d_%H-%M-%S-#{id}.rb")
     end
-
 
   end
 

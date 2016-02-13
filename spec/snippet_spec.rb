@@ -25,6 +25,16 @@ describe RaspiServe::Snippet do
     end
   end
 
+  context 'querying' do
+    before do
+      Fabricate(:snippet, id: 'abc123', code: '3.times {}')
+    end
+
+    it 'returns the snippet by id' do
+      expect(RaspiServe::Snippet.where(id: 'abc123').first.code).to eq '3.times {}'
+    end
+  end
+
   context 'listing' do
     before do
       3.times do |i|

@@ -28,7 +28,21 @@ module RaspiServe
       map '/snippets' do
         run proc { |env|
           env['warden'].authenticate!
-          [200, { 'Content-Type' => 'application/json' }, Snippet.all.to_json ]
+          req = Rack::Request.new(env)
+          body = ['']
+          if req.request_method == 'POST'
+            # POST /snippets
+            Snippet.create(JSON.parse(req.body.read))
+          elsif req.request_method == 'GET'
+            # GET /snippets/{id}
+            if id = req.path_info[1..-1]
+              snippet = Snippet.where(id: id)
+              body = [{code: snippet.first.code}.to_json]
+            else
+              body = Snippet.all.to_json
+            end
+          end
+          [200, { 'Content-Type' => 'application/json' }, body]
         }
       end
 

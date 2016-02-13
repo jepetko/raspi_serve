@@ -15,20 +15,35 @@ module RaspiServe
       RaspiServe.create_rack_app
     end
 
-    def test_list_snippets
+    def before_setup
       Snippet.clear
+    end
+
+    def test_list_snippets
       3.times { Fabricate(:snippet) }
       header 'API_KEY', '123'
       get '/snippets'
       arr = JSON.parse(last_response.body)
       expect(arr.count).to be 3
+      expect(arr.first['id']).to match /^[a-z0-9]+$/
     end
 
     def test_list_snippets_when_api_key_missing
-      Snippet.clear
       3.times { Fabricate(:snippet) }
       get '/snippets'
       expect(last_response.body).to include 'Not Authorized'
+    end
+
+    def test_create_snippet
+      header 'API_KEY', '123'
+      post '/snippets', {code: %q[puts 'hello']}.to_json
+      expect(last_response.status).to eq 200
+      get '/snippets'
+      snippets = JSON.parse(last_response.body)
+      expect(snippets.length).to be 1
+      get "/snippets/#{snippets.first['id']}"
+      snippet = JSON.parse(last_response.body)
+      expect(snippet['code']).to eq %q[puts 'hello']
     end
   end
 end
