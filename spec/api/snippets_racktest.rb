@@ -23,7 +23,7 @@ module RaspiServe
       3.times { Fabricate(:snippet) }
       header 'API_KEY', '123'
       get '/snippets'
-      arr = JSON.parse(last_response.body)
+      arr = JSON.parse last_response.body
       expect(arr.count).to be 3
       expect(arr.first['id']).to match /^[a-z0-9]+$/
     end

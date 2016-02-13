@@ -45,13 +45,13 @@ module RaspiServe
               # GET /snippets/{id}
               if id = req.path_info[1..-1]
                 snippet = Snippet.where(id: id)
-                body = [{code: snippet.first.code}.to_json]
+                body = {code: snippet.first.code}.to_json
               # GET /snippets
               else
                 body = Snippet.all.to_json
               end
           end
-          [200, { 'Content-Type' => 'application/json' }, body]
+          [200, { 'Content-Type' => 'application/json' }, [body]]
         }
       end
 

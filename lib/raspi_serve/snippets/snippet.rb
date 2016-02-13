@@ -86,7 +86,7 @@ module RaspiServe
       File.delete file_path
     end
 
-    def to_json(state)
+    def to_json(state = nil)
       {id: id}.to_json
     end
 
