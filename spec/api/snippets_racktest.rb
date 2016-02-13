@@ -38,12 +38,21 @@ module RaspiServe
       header 'API_KEY', '123'
       post '/snippets', {code: %q[puts 'hello']}.to_json
       expect(last_response.status).to eq 200
-      get '/snippets'
-      snippets = JSON.parse(last_response.body)
-      expect(snippets.length).to be 1
-      get "/snippets/#{snippets.first['id']}"
+
+      last_snippet_id = Snippet.recent(1).first.id
+      get "/snippets/#{last_snippet_id}"
       snippet = JSON.parse(last_response.body)
       expect(snippet['code']).to eq %q[puts 'hello']
+    end
+
+    def test_update_snippet
+      header 'API_KEY', '123'
+      snippet = Fabricate(:snippet, {code: %q[puts 'before']})
+      post "snippets/#{snippet.id}", {code: %q[puts 'after']}.to_json
+
+      get "/snippets/#{snippet.id}"
+      snippet = JSON.parse(last_response.body)
+      expect(snippet['code']).to eq %q[puts 'after']
     end
   end
 end

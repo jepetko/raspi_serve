@@ -5,8 +5,8 @@ describe RaspiServe::Snippet do
   context 'saving' do
     let(:snippet) { Fabricate(:snippet) }
 
-    it 'references a file path' do
-      expect(snippet.file_path).to match /\/snippet\-.*\.rb/
+    it 'has a file name' do
+      expect(snippet.file_name).to match %r[snippet\-.*\.rb]
     end
 
     it 'saves a snippet in a file' do
@@ -19,9 +19,17 @@ describe RaspiServe::Snippet do
   end
 
   context 'creating' do
-
     it 'creates a snippet' do
       expect { RaspiServe::Snippet.create(code: %q[puts 'hello']) }.to change { RaspiServe::Snippet.list_files.count }.by(1)
+    end
+  end
+
+  context 'updating' do
+    let(:snippet) { Fabricate(:snippet) }
+    it 'updates an existing snippet' do
+      RaspiServe::Snippet.update('id' => snippet.id, 'code' => %q[puts 'bye bye'])
+
+      expect(RaspiServe::Snippet.recent(1).first.code).to eq %q[puts 'bye bye']
     end
   end
 

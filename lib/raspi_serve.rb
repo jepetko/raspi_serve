@@ -30,17 +30,26 @@ module RaspiServe
           env['warden'].authenticate!
           req = Rack::Request.new(env)
           body = ['']
-          if req.request_method == 'POST'
-            # POST /snippets
-            Snippet.create(JSON.parse(req.body.read))
-          elsif req.request_method == 'GET'
-            # GET /snippets/{id}
-            if id = req.path_info[1..-1]
-              snippet = Snippet.where(id: id)
-              body = [{code: snippet.first.code}.to_json]
-            else
-              body = Snippet.all.to_json
-            end
+
+          case req.request_method
+            when 'POST'
+              # POST /snippets/{id}
+              if id = req.path_info[1..-1]
+                Snippet.update(JSON.parse(req.body.read).merge(id: id))
+              # POST /snippets
+              else
+                Snippet.create(JSON.parse(req.body.read))
+              end
+
+            when 'GET'
+              # GET /snippets/{id}
+              if id = req.path_info[1..-1]
+                snippet = Snippet.where(id: id)
+                body = [{code: snippet.first.code}.to_json]
+              # GET /snippets
+              else
+                body = Snippet.all.to_json
+              end
           end
           [200, { 'Content-Type' => 'application/json' }, body]
         }

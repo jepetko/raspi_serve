@@ -34,6 +34,12 @@ module RaspiServe
         Snippet.new(params['code']).save
       end
 
+      def update(params)
+        snippet = Snippet.where(id: params['id']).first
+        snippet.code = params['code']
+        snippet.save
+      end
+
       def where(params)
         return nil unless files = Dir[File.expand_path("#{prefix}*#{params[:id]}.rb", target_dir)]
         load_files files
@@ -57,19 +63,18 @@ module RaspiServe
 
     extend ClassMethods
 
-    attr_accessor :id, :code, :file_path
+    attr_accessor :id, :code, :file_name
 
-    def initialize(code = nil, file_path = nil, &block)
+    def initialize(code = nil, file_name = nil, &block)
       @code = code
-      @file_path = file_path
-      @id = @file_path.match(/(?<=\-)[a-z0-9]+(?=\.rb)/)[0] if @file_path
+      @file_name = file_name
+      @id = @file_name.match(/(?<=\-)[a-z0-9]+(?=\.rb)/)[0] if @file_name
       block.call(self) if block_given?
     end
 
     def save
-      file_path = File.expand_path(file_name, self.class.target_dir)
-      File.write(file_path, code)
-      @file_path = file_path
+      @file_name ||= build_file_name
+      File.write(file_path, @code)
       self
     end
 
@@ -91,8 +96,12 @@ module RaspiServe
 
     private
 
-    def file_name
+    def build_file_name
       Time.now.strftime("#{self.class.prefix}%Y-%m-%d_%H-%M-%S-#{id}.rb")
+    end
+
+    def file_path
+      File.expand_path(@file_name, self.class.target_dir)
     end
 
   end
