@@ -54,5 +54,13 @@ module RaspiServe
       snippet = JSON.parse(last_response.body)
       expect(snippet['code']).to eq %q[puts 'after']
     end
+
+    def test_query_snippet
+      header 'API_KEY', '123'
+      get 'snippets/abc123'
+
+      snippet = JSON.parse(last_response.body)
+      expect(snippet).to eq({})
+    end
   end
 end

@@ -29,7 +29,7 @@ module RaspiServe
         run proc { |env|
           env['warden'].authenticate!
           req = Rack::Request.new(env)
-          body = ['']
+          body = nil
 
           case req.request_method
             when 'POST'
@@ -44,8 +44,8 @@ module RaspiServe
             when 'GET'
               # GET /snippets/{id}
               if id = req.path_info[1..-1]
-                snippet = Snippet.where(id: id)
-                body = {code: snippet.first.code}.to_json
+                snippets = Snippet.where(id: id)
+                body = snippets && !snippets.empty? ? {code: snippets.first.code}.to_json : {}.to_json
               # GET /snippets
               else
                 body = Snippet.all.to_json
