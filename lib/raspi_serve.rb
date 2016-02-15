@@ -16,7 +16,7 @@ module RaspiServe
       use Rack::Cors do
         allow do
           origins '*'
-          resource '*', :methods => [:get, :post]
+          resource '*', :headers => :any, :methods => [:get, :post, :options]
         end
       end
 
@@ -27,9 +27,10 @@ module RaspiServe
 
       map '/snippets' do
         run proc { |env|
+
           env['warden'].authenticate!
           req = Rack::Request.new(env)
-          body = nil
+          body = {}.to_json
 
           case req.request_method
             when 'POST'
