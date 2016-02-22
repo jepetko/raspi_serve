@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module RaspiServe
 
   class Snippet
