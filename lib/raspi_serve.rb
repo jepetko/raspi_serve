@@ -8,6 +8,19 @@ Dir[File.expand_path('**/*.rb', File.dirname(__FILE__))].each { |f| require f }
 
 module RaspiServe
 
+  Hash.class_eval do
+    def normalize_hash
+      delta_hash = {}
+      each do |key,val|
+        if key.is_a?(String)
+          delete(key)
+          delta_hash[key.to_sym] = val
+        end
+      end
+      merge! delta_hash
+    end
+  end
+
   def self.create_rack_app(&block)
 
     rack_app = Rack::Builder.new do
@@ -36,10 +49,10 @@ module RaspiServe
             when 'POST'
               # POST /snippets/{id}
               if id = req.path_info[1..-1]
-                Snippet.update(JSON.parse(req.body.read).merge(id: id))
+                Snippet.update(JSON.parse(req.body.read).merge(id: id).normalize_hash)
               # POST /snippets
               else
-                Snippet.create(JSON.parse(req.body.read))
+                Snippet.create(JSON.parse(req.body.read).normalize_hash)
               end
 
             when 'GET'

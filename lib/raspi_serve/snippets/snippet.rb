@@ -32,13 +32,16 @@ module RaspiServe
         load_files list_files.sort_by {|f| File.mtime(f)}.reverse.first(count)
       end
 
-      def create(params)
-        Snippet.new(params['code']).save
+      def create(params, exec_obj = {})
+        Snippet.new(params[:code]).save do |snippet|
+          exec_obj[:output] = `ruby #{snippet.file_path}`
+          exec_obj[:exit_code] = $?.exitstatus
+        end
       end
 
       def update(params)
         snippet = Snippet.where(id: params['id']).first
-        snippet.code = params['code']
+        snippet.code = params[:code]
         snippet.save
       end
 
@@ -74,9 +77,12 @@ module RaspiServe
       block.call(self) if block_given?
     end
 
-    def save
+    def save(&block)
       @file_name ||= build_file_name
       File.write(file_path, @code)
+      if block_given?
+        block.call(self)
+      end
       self
     end
 
@@ -96,14 +102,14 @@ module RaspiServe
       @id ||= SecureRandom.hex
     end
 
+    def file_path
+      File.expand_path(@file_name, self.class.target_dir)
+    end
+
     private
 
     def build_file_name
       Time.now.strftime("#{self.class.prefix}%Y-%m-%d_%H-%M-%S-#{id}.rb")
-    end
-
-    def file_path
-      File.expand_path(@file_name, self.class.target_dir)
     end
 
   end

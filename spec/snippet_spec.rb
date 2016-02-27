@@ -22,12 +22,21 @@ describe RaspiServe::Snippet do
     it 'creates a snippet' do
       expect { RaspiServe::Snippet.create(code: %q[puts 'hello']) }.to change { RaspiServe::Snippet.list_files.count }.by(1)
     end
+    it 'contains the passed code' do
+      snippet = RaspiServe::Snippet.create(code: %q[puts 'hello'])
+      expect(snippet.code).to eq(%q[puts 'hello'])
+    end
+    it 'executes it' do
+      exec_obj = {output: 'hello', exit_code: 0}
+      RaspiServe::Snippet.create({code: %q[puts 'hello']}, exec_obj)
+      expect(exec_obj).to eq({output: "hello\n", exit_code: 0})
+    end
   end
 
   context 'updating' do
     let(:snippet) { Fabricate(:snippet) }
     it 'updates an existing snippet' do
-      RaspiServe::Snippet.update('id' => snippet.id, 'code' => %q[puts 'bye bye'])
+      RaspiServe::Snippet.update(id: snippet.id, code: %q[puts 'bye bye'])
 
       expect(RaspiServe::Snippet.recent(1).first.code).to eq %q[puts 'bye bye']
     end
