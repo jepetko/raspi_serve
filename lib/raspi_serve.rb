@@ -52,7 +52,9 @@ module RaspiServe
                 Snippet.update(JSON.parse(req.body.read).merge(id: id).normalize_hash)
               # POST /snippets
               else
-                Snippet.create(JSON.parse(req.body.read).normalize_hash)
+                exec_obj = {}
+                Snippet.create(JSON.parse(req.body.read).normalize_hash, exec_obj)
+                body = exec_obj.to_json
               end
 
             when 'GET'
